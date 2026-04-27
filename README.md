@@ -1,4 +1,3 @@
-````md
 # Smart Safety IoT System
 
 ## Real Hardware Diagram
@@ -33,6 +32,28 @@
 
 ---
 
+# System Overview
+
+## ESP32 WROOM 32 Type C 38Pin
+
+- Read temperature from **MLX90614**
+- Send temperature data to ESP32-CAM through UART
+
+## ESP32-CAM
+
+- Receive temperature via UART
+- Run camera webserver
+- Show realtime temperature on web
+- Alert when temperature > **37.5°C**
+
+👉 Communication between both boards uses **UART only**
+
+---
+
+# Architecture
+
+```text
+MLX90614 -> ESP32 ----UART----> ESP32-CAM ----WiFi----> Web Browser
 # System Overview
 
 ## ESP32 WROOM 32 Type C 38Pin
