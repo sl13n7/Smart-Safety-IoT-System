@@ -2,9 +2,9 @@
 
 ## Real Hardware Diagram
 
-> Sơ đồ bên dưới dùng **ảnh thật linh kiện** trong project.
+> Sơ đồ bên dưới dùng ảnh thật linh kiện trong project.
 
-![System Diagram](https://raw.githubusercontent.com/sl13n7/Smart-Safety-IoT-System/main/picture/diagram%201.jpg)
+![System Diagram](https://github.com/sl13n7/Smart-Safety-IoT-System/raw/main/picture/diagram%201.jpg)
 
 ---
 
@@ -12,23 +12,23 @@
 
 ### 1. ESP32 WROOM 32 Type C 38Pin
 
-![ESP32](https://raw.githubusercontent.com/sl13n7/Smart-Safety-IoT-System/main/picture/ESP32%20WROOM%2032%20Type%20C%2038Pin.webp)
+![ESP32](https://github.com/sl13n7/Smart-Safety-IoT-System/raw/main/picture/ESP32%20WROOM%2032%20Type%20C%2038Pin.webp)
 
 ### 2. ESP32-CAM
 
-![ESP32-CAM](https://raw.githubusercontent.com/sl13n7/Smart-Safety-IoT-System/main/picture/esp32-cam.webp)
+![ESP32-CAM](https://github.com/sl13n7/Smart-Safety-IoT-System/raw/main/picture/esp32-cam.webp)
 
 ### 3. Buck Converter (Step Down Module)
 
-![Buck Converter](https://raw.githubusercontent.com/sl13n7/Smart-Safety-IoT-System/main/picture/module%20giam%20ap.webp)
+![Buck Converter](https://github.com/sl13n7/Smart-Safety-IoT-System/raw/main/picture/module%20giam%20ap.webp)
 
 ### 4. USB TTL Programmer
 
-![USB TTL](https://raw.githubusercontent.com/sl13n7/Smart-Safety-IoT-System/main/picture/usb.webp)
+![USB TTL](https://github.com/sl13n7/Smart-Safety-IoT-System/raw/main/picture/usb.webp)
 
 ### 5. Adapter Power Supply
 
-![Adapter](https://raw.githubusercontent.com/sl13n7/Smart-Safety-IoT-System/main/picture/adapter.webp)
+![Adapter](https://github.com/sl13n7/Smart-Safety-IoT-System/raw/main/picture/adapter.webp)
 
 ---
 
@@ -36,7 +36,7 @@
 
 ## ESP32 WROOM 32 Type C 38Pin
 
-- Read temperature from **MLX90614**
+- Read temperature from MLX90614
 - Send temperature data to ESP32-CAM through UART
 
 ## ESP32-CAM
@@ -44,7 +44,7 @@
 - Receive temperature via UART
 - Run camera webserver
 - Show realtime temperature on web
-- Alert when temperature > **37.5°C**
+- Alert when temperature > 37.5°C
 
 👉 Communication between both boards uses **UART only**
 
@@ -54,31 +54,6 @@
 
 ```text
 MLX90614 -> ESP32 ----UART----> ESP32-CAM ----WiFi----> Web Browser
-# System Overview
-
-## ESP32 WROOM 32 Type C 38Pin
-
-- Read temperature from **MLX90614**
-- Send temperature data to ESP32-CAM through UART
-
-## ESP32-CAM
-
-- Receive temperature via UART
-- Run camera webserver
-- Show realtime temperature on web
-- Alert when temperature > **37.5°C**
-
-👉 Communication between both boards uses **UART only**
-
----
-
-# Architecture
-
-```text
-MLX90614 -> ESP32 ----UART----> ESP32-CAM ----WiFi----> Web Browser
-````
-
----
 
 # Wiring Diagram
 
