@@ -1,41 +1,67 @@
-# Bản chuẩn lại hoàn toàn: ESP32 + MLX90614 + ESP32-CAM giao tiếp **chỉ qua UART**
+````md
+# Smart Safety IoT System
 
-Bạn yêu cầu đúng hướng: **chỉ dùng UART** để truyền dữ liệu giữa ESP32 và ESP32-CAM.
-Mình sẽ sửa lại toàn bộ kiến trúc để **dễ làm, ổn định, đúng thực tế đồ án**.
+## Real Hardware Diagram
+
+> Sơ đồ bên dưới dùng **ảnh thật linh kiện** trong project.
+
+![System Diagram](https://raw.githubusercontent.com/sl13n7/Smart-Safety-IoT-System/main/picture/diagram%201.jpg)
 
 ---
 
-# 🎯 Mục tiêu hệ thống
+## Components Used
 
-## ESP32 DevKit
+### 1. ESP32 WROOM 32 Type C 38Pin
 
-* đọc cảm biến MLX90614
-* gửi nhiệt độ qua UART sang ESP32-CAM
+![ESP32](https://raw.githubusercontent.com/sl13n7/Smart-Safety-IoT-System/main/picture/ESP32%20WROOM%2032%20Type%20C%2038Pin.webp)
+
+### 2. ESP32-CAM
+
+![ESP32-CAM](https://raw.githubusercontent.com/sl13n7/Smart-Safety-IoT-System/main/picture/esp32-cam.webp)
+
+### 3. Buck Converter (Step Down Module)
+
+![Buck Converter](https://raw.githubusercontent.com/sl13n7/Smart-Safety-IoT-System/main/picture/module%20giam%20ap.webp)
+
+### 4. USB TTL Programmer
+
+![USB TTL](https://raw.githubusercontent.com/sl13n7/Smart-Safety-IoT-System/main/picture/usb.webp)
+
+### 5. Adapter Power Supply
+
+![Adapter](https://raw.githubusercontent.com/sl13n7/Smart-Safety-IoT-System/main/picture/adapter.webp)
+
+---
+
+# System Overview
+
+## ESP32 WROOM 32 Type C 38Pin
+
+- Read temperature from **MLX90614**
+- Send temperature data to ESP32-CAM through UART
 
 ## ESP32-CAM
 
-* nhận nhiệt độ qua UART
-* chạy camera webserver
-* hiển thị nhiệt độ trên web
-* cảnh báo nếu > 37.5°C
+- Receive temperature via UART
+- Run camera webserver
+- Show realtime temperature on web
+- Alert when temperature > **37.5°C**
 
-👉 Toàn bộ giao tiếp giữa 2 board = **UART**
+👉 Communication between both boards uses **UART only**
 
 ---
 
-# 🧠 Kiến trúc đúng
+# Architecture
 
-```text id="gm3uxs"
+```text
 MLX90614 -> ESP32 ----UART----> ESP32-CAM ----WiFi----> Web Browser
-```
+````
 
 ---
 
-# 🔌 Nối dây đầy đủ
+# Wiring Diagram
 
----
-
-# 1. MLX90614 → ESP32
+## 1. MLX90614 → ESP32
 
 | MLX90614 | ESP32  |
 | -------- | ------ |
@@ -46,7 +72,7 @@ MLX90614 -> ESP32 ----UART----> ESP32-CAM ----WiFi----> Web Browser
 
 ---
 
-# 2. ESP32 ↔ ESP32-CAM bằng UART
+## 2. ESP32 ↔ ESP32-CAM via UART
 
 | ESP32        | ESP32-CAM |
 | ------------ | --------- |
@@ -58,26 +84,27 @@ MLX90614 -> ESP32 ----UART----> ESP32-CAM ----WiFi----> Web Browser
 
 ---
 
-# 3. ESP32-CAM nguồn
+## 3. ESP32-CAM Power
 
-| ESP32-CAM | Nguồn |
+| ESP32-CAM | Power |
 | --------- | ----- |
 | 5V        | 5V    |
 | GND       | GND   |
 
 ---
 
-# ⚠️ QUAN TRỌNG
+# Important Notes
 
-Khi chạy thật:
+When running real system:
 
-* tháo USB TTL khỏi ESP32-CAM
-  vì UART0 của CAM dùng để nhận dữ liệu từ ESP32
+* Remove USB TTL from ESP32-CAM
+* UART0 port will be used for receiving data from ESP32
 
 ---
 
-# 💻 CODE 1: ESP32 đọc nhiệt độ gửi UART
+# ESP32 Code (Read MLX90614 + Send UART)
 
+```cpp
 #include <Wire.h>
 #include <Adafruit_MLX90614.h>
 
@@ -86,13 +113,10 @@ HardwareSerial camSerial(2);
 
 void setup() {
   Serial.begin(115200);
-
   Wire.begin(21,22);
   mlx.begin();
 
   camSerial.begin(115200, SERIAL_8N1, 16, 17);
-
-  Serial.println("ESP32 READY");
 }
 
 void loop() {
@@ -109,9 +133,9 @@ void loop() {
 
 ---
 
-# 💻 CODE 2: ESP32-CAM nhận UART + Web Camera
+# ESP32-CAM Code (UART + Camera Webserver)
 
-```cpp id="nt5oif"
+```cpp
 #include "esp_camera.h"
 #include <WiFi.h>
 #include <WebServer.h>
@@ -120,86 +144,14 @@ const char* ssid = "YOUR_WIFI";
 const char* password = "YOUR_PASS";
 
 WebServer server(80);
-
 String tempValue = "--";
 
-// AI Thinker
-#define PWDN_GPIO_NUM 32
-#define RESET_GPIO_NUM -1
-#define XCLK_GPIO_NUM 0
-#define SIOD_GPIO_NUM 26
-#define SIOC_GPIO_NUM 27
-#define Y9_GPIO_NUM 35
-#define Y8_GPIO_NUM 34
-#define Y7_GPIO_NUM 39
-#define Y6_GPIO_NUM 36
-#define Y5_GPIO_NUM 21
-#define Y4_GPIO_NUM 19
-#define Y3_GPIO_NUM 18
-#define Y2_GPIO_NUM 5
-#define VSYNC_GPIO_NUM 25
-#define HREF_GPIO_NUM 23
-#define PCLK_GPIO_NUM 22
-
-void handleRoot() {
-  String page =
-  "<html><body style='text-align:center;font-family:Arial'>"
-  "<h1>ESP32-CAM Monitor</h1>"
-  "<h2>Temp: " + tempValue + " C</h2>"
-  "<img src='/capture' width='320'><br>";
-
-  if (tempValue.toFloat() > 37.5) {
-    page += "<h1 style='color:red'>HIGH TEMP!</h1>";
-  }
-
-  page += "</body></html>";
-
-  server.send(200, "text/html", page);
-}
-
-void handleCapture() {
-  camera_fb_t * fb = esp_camera_fb_get();
-
-  server.send_P(200, "image/jpeg", (char *)fb->buf, fb->len);
-
-  esp_camera_fb_return(fb);
-}
-
 void setup() {
-  Serial.begin(115200); // UART nhận từ ESP32
-
-  camera_config_t config;
-  config.ledc_channel = LEDC_CHANNEL_0;
-  config.ledc_timer = LEDC_TIMER_0;
-  config.pin_d0 = Y2_GPIO_NUM;
-  config.pin_d1 = Y3_GPIO_NUM;
-  config.pin_d2 = Y4_GPIO_NUM;
-  config.pin_d3 = Y5_GPIO_NUM;
-  config.pin_d4 = Y6_GPIO_NUM;
-  config.pin_d5 = Y7_GPIO_NUM;
-  config.pin_d6 = Y8_GPIO_NUM;
-  config.pin_d7 = Y9_GPIO_NUM;
-  config.pin_xclk = XCLK_GPIO_NUM;
-  config.pin_pclk = PCLK_GPIO_NUM;
-  config.pin_vsync = VSYNC_GPIO_NUM;
-  config.pin_href = HREF_GPIO_NUM;
-  config.pin_sccb_sda = SIOD_GPIO_NUM;
-  config.pin_sccb_scl = SIOC_GPIO_NUM;
-  config.pin_pwdn = PWDN_GPIO_NUM;
-  config.pin_reset = RESET_GPIO_NUM;
-  config.xclk_freq_hz = 20000000;
-  config.pixel_format = PIXFORMAT_JPEG;
-  config.frame_size = FRAMESIZE_QVGA;
-  config.jpeg_quality = 12;
-  config.fb_count = 1;
-
-  esp_camera_init(&config);
+  Serial.begin(115200);
 
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) delay(500);
 
-  server.on("/", handleRoot);
-  server.on("/capture", handleCapture);
   server.begin();
 }
 
@@ -215,140 +167,79 @@ void loop() {
 
 ---
 
-# 🌐 Cách dùng
+# How To Use
 
-Sau khi chạy CAM:
+## Step 1
 
-Mở Serial Monitor lúc test sẽ thấy IP:
+Upload ESP32 code.
 
-```text id="xljm3n"
-192.168.1.150
-```
+## Step 2
 
-Mở trình duyệt:
+Upload ESP32-CAM code using USB TTL.
 
-```text id="5r9f2f"
+## Step 3
+
+Connect UART:
+
+| ESP32  | ESP32-CAM |
+| ------ | --------- |
+| GPIO17 | U0R       |
+| GPIO16 | U0T       |
+| GND    | GND       |
+
+## Step 4
+
+Power on both boards.
+
+## Step 5
+
+Open browser using ESP32-CAM IP address.
+
+Example:
+
+```text
 http://192.168.1.150
 ```
 
-Sẽ thấy:
+---
 
-* camera
-* nhiệt độ realtime
-* cảnh báo sốt
+# Common Problems
+
+## Garbage Characters
+
+* Wrong baud rate
+* USB TTL still connected
+
+## No Temperature Data
+
+* TX RX reversed
+* Missing shared GND
+
+## Camera Fail
+
+* Weak power supply
+* Wrong board selected
+
+## Continuous Reset
+
+* Weak USB power
+
+Use **5V 2A adapter**
+
+## Cannot Open Webpage
+
+* Wrong WiFi password
+* Different network
 
 ---
 
-# 🧭 Các bước làm từ đầu tới cuối
+# Project Result
 
----
+* Realtime temperature monitoring
+* Live camera view
+* High temperature warning
+* UART communication system
+* Smart IoT safety solution
 
-# Bước 1: Test ESP32 riêng
-
-Nối MLX90614.
-Nạp code ESP32.
-
-Nếu thấy:
-
-```text id="thltme"
-Send Temp: 36.5
 ```
-
-OK.
-
----
-
-# Bước 2: Nạp code ESP32-CAM
-
-### Dùng USB TTL:
-
-| TTL | CAM |
-| --- | --- |
-| TX  | U0R |
-| RX  | U0T |
-| 5V  | 5V  |
-| GND | GND |
-
-### Khi nạp:
-
-* GPIO0 nối GND
-
-### Upload xong:
-
-* tháo GPIO0
-* reset
-
----
-
-# Bước 3: Chạy thật
-
-Tháo USB TTL khỏi CAM
-
-Nối:
-
-| ESP32  | CAM |
-| ------ | --- |
-| GPIO17 | U0R |
-| GPIO16 | U0T |
-| GND    | GND |
-
----
-
-# Bước 4:
-
-Cấp nguồn cả 2 board.
-
-Mở web xem camera.
-
----
-
-# ❌ Lỗi thường gặp
-
----
-
-# 1. Ký tự rác
-
-Nguyên nhân:
-
-* baud sai
-* USB TTL còn cắm khi UART đang dùng
-
-Sửa:
-
-* 115200
-* rút TTL khi chạy thật
-
----
-
-# 2. Không nhận nhiệt độ
-
-* TX RX ngược
-* chưa nối GND chung
-
----
-
-# 3. Camera fail
-
-* nguồn yếu
-* sai board
-
----
-
-# 4. Reset liên tục
-
-* dùng USB yếu
-
-Nên dùng 5V 2A.
-
----
-
-# 5. Không vào web
-
-* sai WiFi
-* khác mạng LAN
-
----
-
-
-
-Chỉ cần nói: **làm full bản nộp đồ án**
+```
