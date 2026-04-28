@@ -1,4 +1,3 @@
-````markdown id="6c9x8p"
 # Smart Safety IoT System
 
 ## Real Hardware Diagram
@@ -63,9 +62,6 @@ MLX90614
    |
    v
 ESP32 WROOM ----UART----> ESP32-CAM ----WiFi----> Browser / Phone
-````
-
----
 
 # Wiring Diagram
 
