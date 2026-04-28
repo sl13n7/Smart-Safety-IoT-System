@@ -1,59 +1,71 @@
+````markdown id="6c9x8p"
 # Smart Safety IoT System
 
 ## Real Hardware Diagram
 
-> Sơ đồ bên dưới dùng ảnh thật linh kiện trong project.
+> The diagram below uses real hardware from this project.
 
 ![System Diagram](https://github.com/sl13n7/Smart-Safety-IoT-System/raw/main/picture/diagram%201.jpg)
 
 ---
 
-## Components Used
+# Components Used
 
-### 1. ESP32 WROOM 32 Type C 38Pin
+## 1. ESP32 WROOM 32 Type-C 38 Pin
 
 ![ESP32](https://github.com/sl13n7/Smart-Safety-IoT-System/raw/main/picture/ESP32%20WROOM%2032%20Type%20C%2038Pin.webp)
 
-### 2. ESP32-CAM
+## 2. ESP32-CAM
 
 ![ESP32-CAM](https://github.com/sl13n7/Smart-Safety-IoT-System/raw/main/picture/esp32-cam.webp)
 
-### 3. Buck Converter (Step Down Module)
+## 3. Buck Converter (Step-Down Module)
 
 ![Buck Converter](https://github.com/sl13n7/Smart-Safety-IoT-System/raw/main/picture/module%20giam%20ap.webp)
 
-### 4. USB TTL Programmer
+## 4. USB TTL Programmer
 
 ![USB TTL](https://github.com/sl13n7/Smart-Safety-IoT-System/raw/main/picture/usb.webp)
 
-### 5. Adapter Power Supply
+## 5. Adapter Power Supply
 
 ![Adapter](https://github.com/sl13n7/Smart-Safety-IoT-System/raw/main/picture/adapter.webp)
+
+## 6. MLX90614 Infrared Temperature Sensor
+
+Contactless temperature measurement sensor.
 
 ---
 
 # System Overview
 
-## ESP32 WROOM 32 Type C 38Pin
+## ESP32 WROOM 32
 
 - Read temperature from MLX90614
-- Send temperature data to ESP32-CAM through UART
+- Filter and process sensor values
+- Send stable temperature data to ESP32-CAM through UART
 
 ## ESP32-CAM
 
-- Receive temperature via UART
+- Receive temperature data through UART
 - Run camera webserver
-- Show realtime temperature on web
-- Alert when temperature > 37.5°C
+- Display realtime temperature on webpage
+- Trigger warning when temperature exceeds threshold
 
 👉 Communication between both boards uses **UART only**
 
 ---
 
-# Architecture
+# System Architecture
 
 ```text
-MLX90614 -> ESP32 ----UART----> ESP32-CAM ----WiFi----> Web Browser
+MLX90614
+   |
+   v
+ESP32 WROOM ----UART----> ESP32-CAM ----WiFi----> Browser / Phone
+````
+
+---
 
 # Wiring Diagram
 
@@ -80,7 +92,7 @@ MLX90614 -> ESP32 ----UART----> ESP32-CAM ----WiFi----> Web Browser
 
 ---
 
-## 3. ESP32-CAM Power
+## 3. ESP32-CAM Power Supply
 
 | ESP32-CAM | Power |
 | --------- | ----- |
@@ -91,37 +103,66 @@ MLX90614 -> ESP32 ----UART----> ESP32-CAM ----WiFi----> Web Browser
 
 # Important Notes
 
-When running real system:
+## Upload Mode
 
-* Remove USB TTL from ESP32-CAM
-* UART0 port will be used for receiving data from ESP32
+Use USB TTL to upload code to ESP32-CAM.
+
+## Run Mode
+
+Disconnect USB TTL after upload.
+UART0 will be used for communication with ESP32.
 
 ---
 
-# ESP32 Code (Read MLX90614 + Send UART)
+# ESP32 Main Code
 
-```cpp
+## Read MLX90614 + Average Filter + UART Send
+
+```cpp id="s4w2e1"
 #include <Wire.h>
 #include <Adafruit_MLX90614.h>
 
 Adafruit_MLX90614 mlx;
 HardwareSerial camSerial(2);
 
+const int SDA_PIN = 21;
+const int SCL_PIN = 22;
+const int RX2_PIN = 16;
+const int TX2_PIN = 17;
+
+float readAverageTemp() {
+  float sum = 0;
+
+  for (int i = 0; i < 5; i++) {
+    sum += mlx.readObjectTempC();
+    delay(50);
+  }
+
+  return sum / 5.0;
+}
+
 void setup() {
   Serial.begin(115200);
-  Wire.begin(21,22);
-  mlx.begin();
 
-  camSerial.begin(115200, SERIAL_8N1, 16, 17);
+  Wire.begin(SDA_PIN, SCL_PIN);
+
+  if (!mlx.begin()) {
+    Serial.println("MLX90614 NOT FOUND");
+    while (1);
+  }
+
+  camSerial.begin(115200, SERIAL_8N1, RX2_PIN, TX2_PIN);
+
+  Serial.println("ESP32 READY");
 }
 
 void loop() {
-  float temp = mlx.readObjectTempC();
+  float temp = readAverageTemp();
 
-  Serial.print("Send Temp: ");
-  Serial.println(temp);
+  Serial.print("Temperature: ");
+  Serial.println(temp, 2);
 
-  camSerial.println(temp);
+  camSerial.println(temp, 2);
 
   delay(1000);
 }
@@ -129,25 +170,53 @@ void loop() {
 
 ---
 
-# ESP32-CAM Code (UART + Camera Webserver)
+# ESP32-CAM Code
 
-```cpp
+## UART + Webserver + Temperature Dashboard
+
+```cpp id="x8m4qn"
 #include "esp_camera.h"
 #include <WiFi.h>
 #include <WebServer.h>
 
 const char* ssid = "YOUR_WIFI";
-const char* password = "YOUR_PASS";
+const char* password = "YOUR_PASSWORD";
 
 WebServer server(80);
+
 String tempValue = "--";
+float alertTemp = 37.5;
+
+void handleRoot() {
+  String page = "<html><head>";
+  page += "<meta http-equiv='refresh' content='2'>";
+  page += "</head><body style='text-align:center;font-family:Arial;'>";
+
+  page += "<h1>Smart Safety IoT System</h1>";
+  page += "<h2>Realtime Temperature</h2>";
+  page += "<h1>" + tempValue + " C</h1>";
+
+  if (tempValue.toFloat() >= alertTemp) {
+    page += "<h2 style='color:red;'>WARNING: HIGH TEMPERATURE</h2>";
+  } else {
+    page += "<h2 style='color:green;'>NORMAL STATUS</h2>";
+  }
+
+  page += "</body></html>";
+
+  server.send(200, "text/html", page);
+}
 
 void setup() {
   Serial.begin(115200);
 
   WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) delay(500);
 
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+  }
+
+  server.on("/", handleRoot);
   server.begin();
 }
 
@@ -155,8 +224,12 @@ void loop() {
   server.handleClient();
 
   while (Serial.available()) {
-    tempValue = Serial.readStringUntil('\n');
-    tempValue.trim();
+    String data = Serial.readStringUntil('\n');
+    data.trim();
+
+    if (data.length() > 0) {
+      tempValue = data;
+    }
   }
 }
 ```
@@ -167,7 +240,7 @@ void loop() {
 
 ## Step 1
 
-Upload ESP32 code.
+Upload ESP32 main code.
 
 ## Step 2
 
@@ -189,13 +262,47 @@ Power on both boards.
 
 ## Step 5
 
-Open browser using ESP32-CAM IP address.
+Open browser using ESP32-CAM IP.
 
 Example:
 
-```text
+```text id="2nhf20"
 http://192.168.1.150
 ```
+
+---
+
+# Future Development
+
+## RF Emergency Power Cut System
+
+Future version can add **RF wireless shutdown system**.
+
+### Example:
+
+* Smoke / fire detected
+* Temperature too high
+* User presses emergency RF remote button
+
+Then system sends RF signal to:
+
+* Cut main AC relay
+* Disable dangerous equipment
+* Stop machine power automatically
+
+### Supported RF Modules
+
+* 315 MHz RF module
+* 433 MHz RF module
+* LoRa long range RF
+* NRF24L01
+
+### Benefits
+
+* Fast emergency response
+* Wireless control
+* Prevent fire spread
+* Improve industrial safety
 
 ---
 
@@ -209,33 +316,36 @@ http://192.168.1.150
 ## No Temperature Data
 
 * TX RX reversed
-* Missing shared GND
-
-## Camera Fail
-
-* Weak power supply
-* Wrong board selected
-
-## Continuous Reset
-
-* Weak USB power
-
-Use **5V 2A adapter**
+* Missing common GND
 
 ## Cannot Open Webpage
 
 * Wrong WiFi password
 * Different network
 
+## Continuous Reset
+
+* Weak power supply
+
+Use **5V 2A adapter**
+
 ---
 
-# Project Result
+# Final Result
 
-* Realtime temperature monitoring
-* Live camera view
-* High temperature warning
-* UART communication system
-* Smart IoT safety solution
+✅ Realtime temperature monitoring
+✅ UART communication system
+✅ WiFi dashboard
+✅ High temperature warning
+✅ Stable hardware architecture
+✅ Expandable RF emergency shutdown system
+
+---
+
+# Conclusion
+
+This project provides a practical and scalable **Smart Safety IoT System** using ESP32 and ESP32-CAM.
+It supports realtime monitoring today and future RF emergency power cut protection for industrial environments.
 
 ```
 ```
