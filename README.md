@@ -2,9 +2,17 @@
 
 ## Real Hardware Diagram
 
-> The diagram below uses real hardware from this project.
+> The diagram below uses real hardware assembled for this project.
 
 ![System Diagram](https://github.com/sl13n7/Smart-Safety-IoT-System/raw/main/picture/diagram%201.jpg)
+
+---
+
+## Illustration Wiring Diagram
+
+> Simplified connection diagram for easier understanding.
+
+![Illustration Diagram](https://github.com/sl13n7/Smart-Safety-IoT-System/blob/main/picture/Screenshot%20from%202026-04-30%2008-51-16.png)
 
 ---
 
@@ -32,7 +40,7 @@
 
 ## 6. MLX90614 Infrared Temperature Sensor
 
-Contactless temperature measurement sensor.
+Contactless infrared temperature sensor used for realtime measurement.
 
 ---
 
@@ -40,16 +48,17 @@ Contactless temperature measurement sensor.
 
 ## ESP32 WROOM 32
 
-- Read temperature from MLX90614
-- Filter and process sensor values
-- Send stable temperature data to ESP32-CAM through UART
+- Read temperature from MLX90614 sensor
+- Apply average filter for stable values
+- Send temperature data to ESP32-CAM using UART communication
 
 ## ESP32-CAM
 
-- Receive temperature data through UART
-- Run camera webserver
-- Display realtime temperature on webpage
-- Trigger warning when temperature exceeds threshold
+- Receive UART temperature data
+- Connect to WiFi network
+- Host web dashboard
+- Show realtime temperature
+- Trigger warning when threshold is exceeded
 
 👉 Communication between both boards uses **UART only**
 
@@ -58,10 +67,10 @@ Contactless temperature measurement sensor.
 # System Architecture
 
 ```text
-MLX90614
-   |
-   v
-ESP32 WROOM ----UART----> ESP32-CAM ----WiFi----> Browser / Phone
+MLX90614 Sensor
+      |
+      v
+ESP32 WROOM -------- UART --------> ESP32-CAM -------- WiFi --------> Browser / Mobile Phone
 
 # Wiring Diagram
 
