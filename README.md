@@ -114,7 +114,7 @@ UART0 will be used for communication with ESP32.
 
 ## Read MLX90614 + Average Filter + UART Send
 
-```cpp id="s4w2e1"
+
 #include <Wire.h>
 #include <Adafruit_MLX90614.h>
 
@@ -170,7 +170,7 @@ void loop() {
 
 ## UART + Webserver + Temperature Dashboard
 
-```cpp id="x8m4qn"
+
 #include "esp_camera.h"
 #include <WiFi.h>
 #include <WebServer.h>
@@ -262,7 +262,7 @@ Open browser using ESP32-CAM IP.
 
 Example:
 
-```text id="2nhf20"
+```
 http://192.168.1.150
 ```
 
@@ -343,5 +343,3 @@ Use **5V 2A adapter**
 This project provides a practical and scalable **Smart Safety IoT System** using ESP32 and ESP32-CAM.
 It supports realtime monitoring today and future RF emergency power cut protection for industrial environments.
 
-```
-```
