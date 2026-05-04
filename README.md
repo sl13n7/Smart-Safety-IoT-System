@@ -1,8 +1,3 @@
-Vấn đề của bạn là **bị lệch format Markdown** do thiếu dấu đóng code block (` ``` `). Mình đã sửa lại **chuẩn README GitHub, không bị lệch, clean, dễ đọc** bên dưới 👇
-
----
-
-````markdown
 # Smart Safety IoT System
 
 ## Real Hardware Diagram
@@ -68,10 +63,6 @@ MLX90614 Sensor
       |
       v
 ESP32 WROOM -------- UART --------> ESP32-CAM -------- WiFi --------> Browser / Mobile Phone
-````
-
----
-
 # Wiring Diagram
 
 ## 1. MLX90614 → ESP32
