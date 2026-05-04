@@ -1,3 +1,8 @@
+Vấn đề của bạn là **bị lệch format Markdown** do thiếu dấu đóng code block (` ``` `). Mình đã sửa lại **chuẩn README GitHub, không bị lệch, clean, dễ đọc** bên dưới 👇
+
+---
+
+````markdown
 # Smart Safety IoT System
 
 ## Real Hardware Diagram
@@ -19,27 +24,21 @@
 # Components Used
 
 ## 1. ESP32 WROOM 32 Type-C 38 Pin
-
 ![ESP32](https://github.com/sl13n7/Smart-Safety-IoT-System/raw/main/picture/ESP32%20WROOM%2032%20Type%20C%2038Pin.webp)
 
 ## 2. ESP32-CAM
-
 ![ESP32-CAM](https://github.com/sl13n7/Smart-Safety-IoT-System/raw/main/picture/esp32-cam.webp)
 
 ## 3. Buck Converter (Step-Down Module)
-
 ![Buck Converter](https://github.com/sl13n7/Smart-Safety-IoT-System/raw/main/picture/module%20giam%20ap.webp)
 
 ## 4. USB TTL Programmer
-
 ![USB TTL](https://github.com/sl13n7/Smart-Safety-IoT-System/raw/main/picture/usb.webp)
 
 ## 5. Adapter Power Supply
-
 ![Adapter](https://github.com/sl13n7/Smart-Safety-IoT-System/raw/main/picture/adapter.webp)
 
 ## 6. MLX90614 Infrared Temperature Sensor
-
 Contactless infrared temperature sensor used for realtime measurement.
 
 ---
@@ -47,18 +46,16 @@ Contactless infrared temperature sensor used for realtime measurement.
 # System Overview
 
 ## ESP32 WROOM 32
-
-- Read temperature from MLX90614 sensor
-- Apply average filter for stable values
-- Send temperature data to ESP32-CAM using UART communication
+- Read temperature from MLX90614 sensor  
+- Apply average filter for stable values  
+- Send temperature data to ESP32-CAM using UART  
 
 ## ESP32-CAM
-
-- Receive UART temperature data
-- Connect to WiFi network
-- Host web dashboard
-- Show realtime temperature
-- Trigger warning when threshold is exceeded
+- Receive UART temperature data  
+- Connect to WiFi network  
+- Host web dashboard  
+- Show realtime temperature  
+- Trigger warning when threshold is exceeded  
 
 👉 Communication between both boards uses **UART only**
 
@@ -71,6 +68,9 @@ MLX90614 Sensor
       |
       v
 ESP32 WROOM -------- UART --------> ESP32-CAM -------- WiFi --------> Browser / Mobile Phone
+````
+
+---
 
 # Wiring Diagram
 
@@ -123,7 +123,7 @@ UART0 will be used for communication with ESP32.
 
 ## Read MLX90614 + Average Filter + UART Send
 
-
+```cpp
 #include <Wire.h>
 #include <Adafruit_MLX90614.h>
 
@@ -179,7 +179,7 @@ void loop() {
 
 ## UART + Webserver + Temperature Dashboard
 
-
+```cpp
 #include "esp_camera.h"
 #include <WiFi.h>
 #include <WebServer.h>
@@ -243,31 +243,11 @@ void loop() {
 
 # How To Use
 
-## Step 1
-
-Upload ESP32 main code.
-
-## Step 2
-
-Upload ESP32-CAM code using USB TTL.
-
-## Step 3
-
-Connect UART:
-
-| ESP32  | ESP32-CAM |
-| ------ | --------- |
-| GPIO17 | U0R       |
-| GPIO16 | U0T       |
-| GND    | GND       |
-
-## Step 4
-
-Power on both boards.
-
-## Step 5
-
-Open browser using ESP32-CAM IP.
+1. Upload ESP32 main code
+2. Upload ESP32-CAM code using USB TTL
+3. Connect UART (TX ↔ RX)
+4. Power on both boards
+5. Open ESP32-CAM IP in browser
 
 Example:
 
@@ -281,33 +261,10 @@ http://192.168.1.150
 
 ## RF Emergency Power Cut System
 
-Future version can add **RF wireless shutdown system**.
-
-### Example:
-
-* Smoke / fire detected
-* Temperature too high
-* User presses emergency RF remote button
-
-Then system sends RF signal to:
-
-* Cut main AC relay
-* Disable dangerous equipment
-* Stop machine power automatically
-
-### Supported RF Modules
-
-* 315 MHz RF module
-* 433 MHz RF module
-* LoRa long range RF
-* NRF24L01
-
-### Benefits
-
-* Fast emergency response
-* Wireless control
-* Prevent fire spread
-* Improve industrial safety
+* Detect fire / high temperature
+* Send RF signal
+* Cut AC power via relay
+* Stop dangerous devices
 
 ---
 
@@ -321,34 +278,33 @@ Then system sends RF signal to:
 ## No Temperature Data
 
 * TX RX reversed
-* Missing common GND
+* Missing GND
 
 ## Cannot Open Webpage
 
-* Wrong WiFi password
+* Wrong WiFi
 * Different network
 
 ## Continuous Reset
 
 * Weak power supply
 
-Use **5V 2A adapter**
+👉 Use **5V 2A adapter**
 
 ---
 
 # Final Result
 
-✅ Realtime temperature monitoring
-✅ UART communication system
-✅ WiFi dashboard
-✅ High temperature warning
-✅ Stable hardware architecture
-✅ Expandable RF emergency shutdown system
+* Realtime temperature monitoring
+* UART communication
+* WiFi dashboard
+* Warning system
+* Expandable RF shutdown
 
 ---
 
 # Conclusion
 
-This project provides a practical and scalable **Smart Safety IoT System** using ESP32 and ESP32-CAM.
-It supports realtime monitoring today and future RF emergency power cut protection for industrial environments.
+A practical and scalable Smart Safety IoT System using ESP32 + ESP32-CAM.
 
+````
