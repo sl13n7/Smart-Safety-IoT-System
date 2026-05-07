@@ -114,7 +114,7 @@ UART0 will be used for communication with ESP32.
 
 ## Read MLX90614 + Average Filter + UART Send
 
-```cpp
+
 #include <Wire.h>
 #include <Adafruit_MLX90614.h>
 
@@ -170,7 +170,7 @@ void loop() {
 
 ## UART + Webserver + Temperature Dashboard
 
-```cpp
+
 #include "esp_camera.h"
 #include <WiFi.h>
 #include <WebServer.h>
