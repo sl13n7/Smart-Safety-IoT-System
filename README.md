@@ -2,7 +2,7 @@
 
 ## Real Hardware Diagram
 
-> The diagram below uses real hardware assembled for this project.
+> The diagram below shows the actual hardware used in this project.
 
 ![System Diagram](https://github.com/sl13n7/Smart-Safety-IoT-System/raw/main/picture/diagram%201.jpg)
 
@@ -10,7 +10,7 @@
 
 ## Illustration Wiring Diagram
 
-> Simplified connection diagram for easier understanding.
+> Simplified wiring diagram for easier understanding.
 
 ![Illustration Diagram](https://github.com/sl13n7/Smart-Safety-IoT-System/blob/main/picture/Screenshot%20from%202026-04-30%2008-51-16.png)
 
@@ -19,40 +19,80 @@
 # Components Used
 
 ## 1. ESP32 WROOM 32 Type-C 38 Pin
+
 ![ESP32](https://github.com/sl13n7/Smart-Safety-IoT-System/raw/main/picture/ESP32%20WROOM%2032%20Type%20C%2038Pin.webp)
 
+Main microcontroller used for:
+- Reading temperature data
+- Filtering sensor values
+- UART communication
+
+---
+
 ## 2. ESP32-CAM
+
 ![ESP32-CAM](https://github.com/sl13n7/Smart-Safety-IoT-System/raw/main/picture/esp32-cam.webp)
 
+Used for:
+- WiFi connection
+- Hosting web dashboard
+- Displaying realtime temperature data
+
+---
+
 ## 3. Buck Converter (Step-Down Module)
+
 ![Buck Converter](https://github.com/sl13n7/Smart-Safety-IoT-System/raw/main/picture/module%20giam%20ap.webp)
 
+Used to provide stable voltage for the system.
+
+---
+
 ## 4. USB TTL Programmer
+
 ![USB TTL](https://github.com/sl13n7/Smart-Safety-IoT-System/raw/main/picture/usb.webp)
 
+Used to upload code to the ESP32-CAM.
+
+---
+
 ## 5. Adapter Power Supply
+
 ![Adapter](https://github.com/sl13n7/Smart-Safety-IoT-System/raw/main/picture/adapter.webp)
 
+Provides power for ESP32 and ESP32-CAM modules.
+
+---
+
 ## 6. MLX90614 Infrared Temperature Sensor
-Contactless infrared temperature sensor used for realtime measurement.
+
+Contactless infrared temperature sensor used for realtime temperature measurement.
 
 ---
 
 # System Overview
 
 ## ESP32 WROOM 32
-- Read temperature from MLX90614 sensor  
-- Apply average filter for stable values  
-- Send temperature data to ESP32-CAM using UART  
+
+- Read temperature from MLX90614 sensor
+- Apply average filter for stable readings
+- Send temperature data to ESP32-CAM using UART communication
+
+---
 
 ## ESP32-CAM
-- Receive UART temperature data  
-- Connect to WiFi network  
-- Host web dashboard  
-- Show realtime temperature  
-- Trigger warning when threshold is exceeded  
 
-👉 Communication between both boards uses **UART only**
+- Receive UART temperature data
+- Connect to WiFi network
+- Host web dashboard
+- Display realtime temperature
+- Trigger warning when temperature exceeds threshold
+
+---
+
+## Communication Method
+
+👉 Communication between both boards uses **UART only**.
 
 ---
 
@@ -63,6 +103,8 @@ MLX90614 Sensor
       |
       v
 ESP32 WROOM -------- UART --------> ESP32-CAM -------- WiFi --------> Browser / Mobile Phone
+
+
 # Wiring Diagram
 
 ## 1. MLX90614 → ESP32
@@ -101,12 +143,15 @@ ESP32 WROOM -------- UART --------> ESP32-CAM -------- WiFi --------> Browser / 
 
 ## Upload Mode
 
-Use USB TTL to upload code to ESP32-CAM.
+Use a USB TTL programmer to upload code to the ESP32-CAM.
+
+---
 
 ## Run Mode
 
-Disconnect USB TTL after upload.
-UART0 will be used for communication with ESP32.
+Disconnect the USB TTL after uploading.
+
+UART0 will then be used for communication with the ESP32.
 
 ---
 
@@ -114,7 +159,7 @@ UART0 will be used for communication with ESP32.
 
 ## Read MLX90614 + Average Filter + UART Send
 
-
+```cpp
 #include <Wire.h>
 #include <Adafruit_MLX90614.h>
 
@@ -170,7 +215,7 @@ void loop() {
 
 ## UART + Webserver + Temperature Dashboard
 
-
+```cpp
 #include "esp_camera.h"
 #include <WiFi.h>
 #include <WebServer.h>
@@ -234,15 +279,15 @@ void loop() {
 
 # How To Use
 
-1. Upload ESP32 main code
-2. Upload ESP32-CAM code using USB TTL
-3. Connect UART (TX ↔ RX)
+1. Upload the ESP32 main code
+2. Upload the ESP32-CAM code using USB TTL
+3. Connect UART communication (TX ↔ RX)
 4. Power on both boards
-5. Open ESP32-CAM IP in browser
+5. Open the ESP32-CAM IP address in a browser
 
 Example:
 
-```
+```text
 http://192.168.1.150
 ```
 
@@ -252,10 +297,12 @@ http://192.168.1.150
 
 ## RF Emergency Power Cut System
 
-* Detect fire / high temperature
-* Send RF signal
-* Cut AC power via relay
-* Stop dangerous devices
+Planned future features:
+
+* Detect fire or dangerous temperature
+* Send RF emergency signal
+* Cut AC power using relay
+* Automatically stop dangerous devices
 
 ---
 
@@ -263,39 +310,56 @@ http://192.168.1.150
 
 ## Garbage Characters
 
+Possible causes:
+
 * Wrong baud rate
 * USB TTL still connected
 
+---
+
 ## No Temperature Data
 
-* TX RX reversed
-* Missing GND
+Possible causes:
+
+* TX/RX connected incorrectly
+* Missing common GND connection
+
+---
 
 ## Cannot Open Webpage
 
-* Wrong WiFi
-* Different network
+Possible causes:
+
+* Wrong WiFi credentials
+* Devices are on different networks
+
+---
 
 ## Continuous Reset
 
+Possible cause:
+
 * Weak power supply
 
-👉 Use **5V 2A adapter**
+👉 Recommended: **5V 2A adapter**
 
 ---
 
 # Final Result
 
+Features completed:
+
 * Realtime temperature monitoring
 * UART communication
 * WiFi dashboard
 * Warning system
-* Expandable RF shutdown
+* Expandable RF emergency shutdown system
 
 ---
 
 # Conclusion
 
-A practical and scalable Smart Safety IoT System using ESP32 + ESP32-CAM.
+A practical and scalable Smart Safety IoT System using ESP32 and ESP32-CAM for realtime monitoring, wireless dashboard visualization, and future emergency protection expansion.
 
-````
+```
+```
